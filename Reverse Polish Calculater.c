@@ -15,71 +15,72 @@ void push(Stack *s, double value);
 double pop(Stack *s);
 double calculate(char op, double a, double b);
 void printStack(const Stack *s);
+void printInstructions(void);
+void handleInput(Stack *stack);
+void handleError(const char *message);
 
-int main() {
-    // Commented out to avoid platform dependency
-    // system("color b"); // Define the text color
-    
-    Stack stack;
-    initializeStack(&stack);
+// Function to print instructions
+void printInstructions(void) {
+    printf("**==========================**\n");
+    printf("  Reverse Polish Calculator\n");
+    printf("=============================\n\n");
+    printf("Instructions:\n");
+    printf("  Enter numbers with '?'\n");
+    printf("  Enter operations (+, -, *, /)\n");
+    printf("  Enter '=' to show the top of the stack\n");
+    printf("  Enter '#' to exit\n\n");
+    printf("Enter your math expression: ");
+}
 
+// Function to handle input
+void handleInput(Stack *stack) {
     char token;
     double operand, a, b;
-
-    // Home Display
-    printf("\t\t\t\t\t=============================\n");
-    printf("\t\t\t\t\t Reverse Polish Calculator\n");
-    printf("\t\t\t\t\t=============================\n\n");
-    printf("\t\t\t\t\tEnter your math expression: ");
 
     while (1) {
         scanf(" %c", &token); // Handle leading whitespaces
         if (token == '?') {
             scanf("%lf", &operand);
-            push(&stack, operand);
+            push(stack, operand);
         } else if (token == '+' || token == '-' || token == '*' || token == '/') {
-            b = pop(&stack);
-            a = pop(&stack);
-            push(&stack, calculate(token, a, b));
+            b = pop(stack);
+            a = pop(stack);
+            push(stack, calculate(token, a, b));
         } else if (token == '=') {
-            printf("\t\t\t\t\t>>> %lf\n", stack.items[stack.top]);
-            printf("\n\t\t\t\t\t");
+            printf(">>> %lf\n", stack->items[stack->top]);
+            printf("\n");
         } else if (token == '#') { // Stop condition
-            printf("\t\t\t\t\tGood Day!\n");
+            printf("Goodbye!\n");
             break;
         } else {
-            printf("\t\t\t\t\tInvalid input\n");
+            printf("Invalid input\n");
         }
-        printStack(&stack); // Print the stack state for debugging
+        printStack(stack); // Print the stack state for debugging
     }
-
-    return 0;
 }
 
-// Initialize the stack
+// Function to initialize the stack
 void initializeStack(Stack *s) {
     s->top = -1;
 }
 
-// Push a value onto the stack
+// Function to push a value onto the stack
 void push(Stack *s, double value) {
     if (s->top == STACK_SIZE - 1) {
-        printf("\t\t\t\t\tStack Overflow\n");
-        exit(EXIT_FAILURE);
+        handleError("Stack Overflow");
     }
     s->items[++(s->top)] = value;
 }
 
-// Pop a value from the stack
+// Function to pop a value from the stack
 double pop(Stack *s) {
     if (s->top == -1) {
-        printf("\t\t\t\t\tStack Underflow\n");
-        exit(EXIT_FAILURE);
+        handleError("Stack Underflow");
     }
     return s->items[(s->top)--];
 }
 
-// Perform arithmetic operation
+// Function to perform arithmetic operations
 double calculate(char op, double a, double b) {
     switch (op) {
         case '+':
@@ -90,21 +91,37 @@ double calculate(char op, double a, double b) {
             return a * b;
         case '/':
             if (b == 0) {
-                printf("\t\t\t\t\tDivision by zero\n");
-                exit(EXIT_FAILURE);
+                handleError("Division by zero");
             }
             return a / b;
         default:
-            printf("\t\t\t\t\tInvalid operator\n");
-            exit(EXIT_FAILURE);
+            handleError("Invalid operator");
+            return 0; // This line will never be reached due to exit in handleError
     }
 }
 
-// Print the stack for debugging
+// Function to print the stack for debugging
 void printStack(const Stack *s) {
-    printf("\t\t\t\t\tStack state: ");
+    printf("Stack state: ");
     for (int i = 0; i <= s->top; i++) {
         printf("%lf ", s->items[i]);
     }
     printf("\n");
 }
+
+// Function to handle errors
+void handleError(const char *message) {
+    printf("%s\n", message);
+    exit(EXIT_FAILURE);
+}
+
+int main() {
+    Stack stack;
+    initializeStack(&stack);
+
+    printInstructions();
+    handleInput(&stack);
+
+    return 0;
+}
+
